@@ -1,0 +1,89 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "./client"
+}
+
+model Person {
+  id       Int       @id @default(autoincrement())
+  name     String
+  age      DateTime?
+  language String
+  user     User      @relation(fields: [userId], references: [id])
+  userId   Int       @unique
+}
+
+model User {
+  id          Int      @id @default(autoincrement())
+  email       String   @unique
+  username    String?
+  fullName    String?
+  firstName   String?
+  lastName    String?
+  phoneNumber String?
+  role        String?
+  password    String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  person      Person?
+  profile     Profile?
+}
+
+model Profile {
+  id       Int      @id @default(autoincrement())
+  username String   @unique
+  email    String?
+  bio      String?
+  urls     String[]
+  user     User     @relation(fields: [userId], references: [id])
+  userId   Int      @unique
+}
+
+model Notification {
+  id                  Int              @id @default(autoincrement())
+  email               String
+  type                NotificationType @default(ALL)
+  mobile              Boolean          @default(false)
+  communicationEmails Boolean          @default(false) @map("communication_emails")
+  socialEmails        Boolean          @default(false) @map("social_emails")
+  marketingEmails     Boolean          @default(false) @map("marketing_emails")
+  securityEmails      Boolean          @default(true)
+}
+
+enum NotificationType {
+  ALL
+  MENTIONS
+  NONE
+}
+
+model Message {
+  id        String   @id @default(uuid())
+  content   String
+  timestamp DateTime
+  sender    String
+  receiver  String
+}
+
+model Task {
+  id         String   @id @default(uuid())
+  title      String
+  email      String
+  status     String
+  priority   String
+  label      String?
+  createTime DateTime @default(now())
+}
+
+model Document {
+  id         String   @id @default(uuid())
+  name       String
+  type       String
+  parentId   String?  @map("parent_id")
+  ownerEmail String
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+}
