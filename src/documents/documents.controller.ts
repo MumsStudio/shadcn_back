@@ -14,7 +14,7 @@ export class DocumentsController {
   @UseGuards(AuthGuard('jwt'))
   create(@Body() createDocumentDto: CreateDocumentDto, @Headers('Authorization') token: string) {
     const email = TokenUtil.extractEmailFromToken(token);
-    return this.documentsService.create({...createDocumentDto, ownerEmail: email});
+    return this.documentsService.create({ ...createDocumentDto, ownerEmail: email });
   }
 
   @Get()
@@ -32,13 +32,27 @@ export class DocumentsController {
 
   @Post(':id')
   @UseGuards(AuthGuard('jwt'))
-  update(@Param('id') id: string, @Body() updateDocumentDto: UpdateDocumentDto) {
-    return this.documentsService.update(id, updateDocumentDto);
+  update(@Param('id') id: string, @Body() updateDocumentDto: UpdateDocumentDto,
+    @Headers('Authorization') token: string) {
+    const email = TokenUtil.extractEmailFromToken(token);
+    return this.documentsService.update(id, updateDocumentDto, email);
   }
 
   @Delete(':id')
   @UseGuards(AuthGuard('jwt'))
   remove(@Param('id') id: string) {
     return this.documentsService.remove(id);
+  }
+
+  @Post(':id/permissions')
+  @UseGuards(AuthGuard('jwt'))
+  setPermission(
+    @Param('id') documentId: string,
+    @Body('userEmail') userEmail: string,
+    @Body('permission') permission: string,
+    @Headers('Authorization') token: string
+  ) {
+    const ownerEmail = TokenUtil.extractEmailFromToken(token);
+    return this.documentsService.setPermission(documentId, userEmail, permission, ownerEmail);
   }
 }

@@ -7,6 +7,8 @@ import { ChatGateway } from './chat/chat.gateway';
 import { MessagesModule } from './chat/messages.module';
 import { TaskModule } from './tasks/task.module';
 import { DocumentsModule } from './documents/documents.module';
+import { CloudDocumentModule } from './cloudDocument/cloud-document.module';
+import { WhiteboardModule } from './whiteboard/whiteboard.module';
 
 
 @Module({
@@ -15,6 +17,8 @@ import { DocumentsModule } from './documents/documents.module';
     MessagesModule,
     TaskModule,
     DocumentsModule,
+    CloudDocumentModule,
+    WhiteboardModule
   ],
   providers: [AppService, ChatGateway],
   controllers: [AppController, AuthController,],
