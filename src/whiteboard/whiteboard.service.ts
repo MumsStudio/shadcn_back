@@ -1,4 +1,3 @@
-import { WhiteBoard } from './../../node_modules/.pnpm/@prisma+client@6.7.0_typescript@5.8.3/node_modules/.prisma/client/index.d';
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateWhiteboardDto } from './dto/create-whiteboard.dto';

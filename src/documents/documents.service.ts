@@ -7,7 +7,7 @@ import { Document } from '../../prisma/client';
 @Injectable()
 export class DocumentsService {
   constructor(private prisma: PrismaService) {
-    console.log(prisma.document); // 调试检查
+    // console.log(prisma.document); // 调试检查
   }
 
   async create(createDocumentDto: any) {
