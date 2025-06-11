@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import { LoggingInterceptor } from './interceptors/logging.interceptor';
 import { IoAdapter } from '@nestjs/platform-socket.io';
 import * as dotenv from 'dotenv';
+import { json, urlencoded } from 'express';
 
 dotenv.config();
 
@@ -15,6 +16,8 @@ async function bootstrap() {
     credentials: true,
   });
   app.useWebSocketAdapter(new IoAdapter(app));
+  app.use(json({ limit: '50mb' }));
+  app.use(urlencoded({ extended: true, limit: '50mb' }));
   await app.listen(7382);
 }
 bootstrap();

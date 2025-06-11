@@ -163,6 +163,49 @@ model WhiteBoardPermission {
   updatedAt    DateTime   @updatedAt
 }
 
+model Table {
+  id           String    @id @default(uuid())
+  locale       String
+  name         String
+  resources    Json[]
+  sheetOrder   Json[]
+  sheets       Json
+  styles       Json
+  workbookId   String
+  ownerEmail   String
+  lastEditedAt DateTime @default(now())
+  createdAt    DateTime @default(now())
+  version      Int      @default(1)
+  lastEditedBy String?
+  history      TableHistory[]
+  permissions  TablePermission[]
+}
+
+model TableHistory {
+  id           String   @id @default(uuid())
+  name         String
+  tableId      String
+  table        Table    @relation(fields: [tableId], references: [id])
+  resources    Json[]
+  sheetOrder   Json[]
+  sheets       Json
+  styles       Json
+  version      Int
+  editedBy     String?
+  editedAt     DateTime @default(now())
+  createdAt    DateTime @default(now())
+}
+
+model TablePermission {
+  id           String    @id @default(uuid())
+  tableId      String
+  table        Table     @relation(fields: [tableId], references: [id])
+  userEmail    String
+  permission   String    @default("EDIT") // EDIT, VIEW, etc.
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
 model FileLibrary {
   id         String    @id @default(uuid())
   fileId     String    @unique

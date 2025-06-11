@@ -9,6 +9,7 @@ import { TaskModule } from './tasks/task.module';
 import { DocumentsModule } from './documents/documents.module';
 import { CloudDocumentModule } from './cloudDocument/cloud-document.module';
 import { WhiteboardModule } from './whiteboard/whiteboard.module';
+import { TableModule } from './table/table.module';
 
 
 @Module({
@@ -18,7 +19,8 @@ import { WhiteboardModule } from './whiteboard/whiteboard.module';
     TaskModule,
     DocumentsModule,
     CloudDocumentModule,
-    WhiteboardModule
+    WhiteboardModule,
+    TableModule,
   ],
   providers: [AppService, ChatGateway],
   controllers: [AppController, AuthController,],
