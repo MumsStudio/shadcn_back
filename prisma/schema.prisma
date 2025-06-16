@@ -120,9 +120,11 @@ model DocumentPermission {
   documentId String
   document   Document  @relation(fields: [documentId], references: [id])
   userEmail  String
-  permission String   @default("EDIT") // EDIT, VIEW, etc.
+  permission String   @default("EDIT")
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+  
+  @@unique([documentId, userEmail])
 }
 
 model WhiteBoard {

@@ -26,8 +26,9 @@ export class DocumentsController {
 
   @Get(':id')
   @UseGuards(AuthGuard('jwt'))
-  findOne(@Param('id') id: string) {
-    return this.documentsService.findOne(id);
+  findOne(@Param('id') id: string, @Headers('Authorization') token: string) {
+    const email = TokenUtil.extractEmailFromToken(token);
+    return this.documentsService.findOne(id, email);
   }
 
   @Post(':id')
@@ -48,11 +49,31 @@ export class DocumentsController {
   @UseGuards(AuthGuard('jwt'))
   setPermission(
     @Param('id') documentId: string,
-    @Body('userEmail') userEmail: string,
-    @Body('permission') permission: string,
+    @Body() data: Object,
     @Headers('Authorization') token: string
   ) {
     const ownerEmail = TokenUtil.extractEmailFromToken(token);
+    const { userEmail, permission } = data as { userEmail: string; permission: string };
     return this.documentsService.setPermission(documentId, userEmail, permission, ownerEmail);
+  }
+
+  @Get(':id/collaborators')
+  @UseGuards(AuthGuard('jwt'))
+  getCollaborators(
+    @Param('id') documentId: string
+  ) {
+    return this.documentsService.getCollaborators(documentId);
+  }
+
+  @Delete(':id/permissions')
+  @UseGuards(AuthGuard('jwt'))
+  removePermission(
+    @Param('id') documentId: string,
+    @Body() data: Object,
+    @Headers('Authorization') token: string
+  ) {
+    const ownerEmail = TokenUtil.extractEmailFromToken(token);
+    const { userEmail } = data as { userEmail: string };
+    return this.documentsService.removePermission(documentId, userEmail, ownerEmail);
   }
 }

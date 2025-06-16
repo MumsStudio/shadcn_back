@@ -23,8 +23,8 @@ export class CloudDocumentService {
     });
   }
 
-  async findOne(id: string) {
-    return this.prisma.cloudDocument.findUnique({
+  async findOne(id: string, email: string) {
+    const document = await this.prisma.cloudDocument.findUnique({
       where: { documentId: id },
       include: {
         document: {
@@ -34,6 +34,20 @@ export class CloudDocumentService {
         }
       }
     });
+
+    if (!document) {
+      throw new Error('文档不存在');
+    }
+
+    // 检查是否是文档拥有者或有权限的用户
+    const hasPermission = document.document.ownerEmail === email ||
+      document.document.permissions.some(p => p.userEmail === email);
+
+    if (!hasPermission) {
+      return { message: '您没有权限查看此文档', errCode: 403 };
+    }
+
+    return document;
   }
 
   async update(id: string, updateCloudDocumentDto: UpdateCloudDocumentDto, userEmail: string) {

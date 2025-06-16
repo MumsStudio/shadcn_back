@@ -10,6 +10,7 @@ import { DocumentsModule } from './documents/documents.module';
 import { CloudDocumentModule } from './cloudDocument/cloud-document.module';
 import { WhiteboardModule } from './whiteboard/whiteboard.module';
 import { TableModule } from './table/table.module';
+import { CollaborationGateway } from './collaboration/collaboration.gateway';
 
 
 @Module({
@@ -22,7 +23,7 @@ import { TableModule } from './table/table.module';
     WhiteboardModule,
     TableModule,
   ],
-  providers: [AppService, ChatGateway],
+  providers: [AppService, ChatGateway, CollaborationGateway],
   controllers: [AppController, AuthController,],
 })
 export class AppModule { }

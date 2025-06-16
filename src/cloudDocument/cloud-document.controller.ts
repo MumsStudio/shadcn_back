@@ -22,13 +22,14 @@ export class CloudDocumentController {
 
   @Get(':id')
   @UseGuards(AuthGuard('jwt'))
-  findOne(@Param('id') id: string) {
-    return this.cloudDocumentService.findOne(id);
+  findOne(@Param('id') id: string, @Headers('Authorization') token: string) {
+    const email = TokenUtil.extractEmailFromToken(token);
+    return this.cloudDocumentService.findOne(id, email);
   }
 
   @Patch(':id')
   @UseGuards(AuthGuard('jwt'))
-  update(@Param('id') id: string, @Body() updateCloudDocumentDto: UpdateCloudDocumentDto , @Headers('Authorization') token: string) {
+  update(@Param('id') id: string, @Body() updateCloudDocumentDto: UpdateCloudDocumentDto, @Headers('Authorization') token: string) {
     const userEmail = TokenUtil.extractEmailFromToken(token);
     return this.cloudDocumentService.update(id, updateCloudDocumentDto, userEmail);
   }

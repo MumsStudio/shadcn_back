@@ -36,16 +36,45 @@ export class DocumentsService {
   }
 
 
-  async findAll(ownerEmail: string) {
+  async findAll(userEmail: string) {
     return this.prisma.document.findMany({
-      where: { ownerEmail }
+      where: {
+        OR: [
+          { ownerEmail: userEmail },
+          {
+            permissions: {
+              some: {
+                userEmail,
+                permission: { in: ['VIEW', 'EDIT', 'ADMIN'] }
+              }
+            }
+          }
+        ]
+      },
+      include: { permissions: true }
     });
   }
 
-  async findOne(id: string) {
-    return this.prisma.document.findUnique({
-      where: { id }
+  async findOne(id: string, email: string) {
+    const document = await this.prisma.document.findUnique({
+      where: { id },
+      include: { permissions: true }
     });
+
+    if (!document) {
+      throw new Error('文档不存在');
+    }
+
+    // 检查是否是文档拥有者或有权限的用户
+    const hasPermission = document.ownerEmail === email ||
+      document.permissions.some(p => p.userEmail === email);
+    console.log(hasPermission, 'hasPermission111');
+    if (!hasPermission) {
+      // throw new Error('您没有权限查看此文档');
+      return { message: '您没有权限查看此文档', errCode: 403 };
+    }
+
+    return document;
   }
 
   async update(id: string, updateDocumentDto: UpdateDocumentDto, userEmail: string) {
@@ -90,12 +119,17 @@ export class DocumentsService {
     ]);
   }
 
-  async setPermission(documentId: string, userEmail: string, permission: string, ownerEmail: string) {
-    // 检查是否是文档拥有者
-    if (ownerEmail !== userEmail) {
-      throw new Error('只有文档拥有者可以设置权限');
-    }
+  async getCollaborators(documentId: string) {
+    return this.prisma.documentPermission.findMany({
+      where: { documentId },
+      select: {
+        userEmail: true,
+        permission: true,
+      }
+    });
+  }
 
+  async setPermission(documentId: string, userEmail: string, permission: string, ownerEmail: string) {
     // 检查文档是否存在
     const document = await this.prisma.document.findUnique({
       where: { id: documentId }
@@ -105,22 +139,78 @@ export class DocumentsService {
       throw new Error('文档不存在');
     }
 
-    // 设置或更新权限
-    return this.prisma.documentPermission.upsert({
-      where: {
-        documentId_userEmail: {
-          documentId,
-          userEmail
+    // 递归设置权限
+    const setPermissionRecursive = async (docId: string) => {
+      const doc = await this.prisma.document.findUnique({
+        where: { id: docId },
+        select: { parentId: true }
+      });
+
+      // 设置当前文档权限
+      await this.prisma.documentPermission.upsert({
+        where: {
+          documentId_userEmail: {
+            documentId: docId,
+            userEmail
+          }
+        },
+        update: {
+          permission
+        },
+        create: {
+          documentId: docId,
+          userEmail,
+          permission
         }
-      },
-      update: {
-        permission
-      },
-      create: {
-        documentId,
-        userEmail,
-        permission
+      });
+
+      // 递归设置父级文档权限
+      if (doc?.parentId && doc.parentId !== '-1') {
+        await setPermissionRecursive(doc.parentId);
       }
+    };
+
+    return setPermissionRecursive(documentId);
+  }
+
+  async removePermission(documentId: string, userEmail: string, ownerEmail: string) {
+    // 检查文档是否存在
+    const document = await this.prisma.document.findUnique({
+      where: { id: documentId }
     });
+
+    if (!document) {
+      throw new Error('文档不存在');
+    }
+
+    // 检查是否是文档拥有者
+    if (document.ownerEmail !== ownerEmail) {
+      throw new Error('只有文档拥有者可以移除权限');
+    }
+
+    // 递归移除权限
+    const removePermissionRecursive = async (docId: string) => {
+      const doc = await this.prisma.document.findUnique({
+        where: { id: docId },
+        select: { parentId: true }
+      });
+
+      // 移除当前文档权限
+      await this.prisma.documentPermission.delete({
+        where: {
+          documentId_userEmail: {
+            documentId: docId,
+            userEmail
+          }
+        }
+      });
+
+      // 递归移除父级文档权限
+      if (doc?.parentId && doc.parentId !== '-1') {
+        await removePermissionRecursive(doc.parentId);
+      }
+    };
+
+    return removePermissionRecursive(documentId);
   }
 }

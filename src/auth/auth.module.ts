@@ -5,6 +5,7 @@ import { JwtStrategy } from './jwt.strategy';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { UsersModule } from '../users/users.module';
+import { CollaborationGateway } from 'src/collaboration/collaboration.gateway';
 
 @Module({
   imports: [
@@ -16,7 +17,7 @@ import { UsersModule } from '../users/users.module';
   ],
   providers: [AuthService,
     LocalStrategy,
-    JwtStrategy
+    JwtStrategy,
   ],
   exports: [AuthService],
 })
