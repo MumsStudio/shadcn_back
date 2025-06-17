@@ -1,35 +1,35 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
-import { Hocuspocus, Configuration } from '@hocuspocus/server';
+import { Hocuspocus } from '@hocuspocus/server';
 import { SQLite } from '@hocuspocus/extension-sqlite';
-import { JwtService } from '@nestjs/jwt';
-
+import { Server } from '@hocuspocus/server'
 @Injectable()
 export class CollaborationGateway implements OnModuleInit {
   private hocuspocus: Hocuspocus;
 
-  // constructor(private jwtService: JwtService) { }
-
   onModuleInit() {
-    this.hocuspocus = new Hocuspocus({
-      port: 1235, // 使用不同端口
+
+    let timeout;
+    const server = new Server({
+      port: 1235,
+      timeout: 3000,
+      debounce: 5000,
+      // maxDebounce: 5000,
+      async onConnect() {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => {
+          console.log('New connection');
+        }, 500); // 500ms内只执行最后一次
+      },
+      async onDisconnect() {
+        console.log('Connection closed');
+      },
       extensions: [
         new SQLite({
-          database: 'collaboration.db',
+          database: 'db.sqlite'
         }),
       ],
-      // async onAuthenticate(data) {
-      //   try {
-      //     // 使用与聊天相同的JWT验证
-      //     const payload = this.jwtService.verify(data.token);
-      //     return { user: payload };
-      //   } catch (e) {
-      //     return false;
-      //   }
-      // },
-      onListen: () => console.log('服务器已启动'),
-      onConnect: (conn) => console.log(`客户端连接: ${conn.id}`),
-      onDisconnect: (conn) => console.log(`客户端断开: ${conn.id}`),
-      onError: (error) => console.error('服务器错误:', error)
-    } as unknown as Configuration);
+    });
+
+    server.listen()
   }
 }

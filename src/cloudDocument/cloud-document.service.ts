@@ -68,13 +68,14 @@ export class CloudDocumentService {
     }
 
     // 检查用户是否有权限编辑文档
+    const editablePermissions = ['EDIT', 'ADMIN'];
     const hasPermission = documentWithPermissions.document.ownerEmail === userEmail ||
       documentWithPermissions.document.permissions.some(
-        p => p.userEmail === userEmail && p.permission === 'EDIT'
+        p => p.userEmail === userEmail && editablePermissions.includes(p.permission)
       );
 
     if (!hasPermission) {
-      throw new Error('您没有权限编辑此文档');
+      { return { message: '您没有权限编辑此文档', errCode: 403 } }
     }
 
     // 保存历史记录
