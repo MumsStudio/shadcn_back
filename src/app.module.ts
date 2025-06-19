@@ -11,6 +11,9 @@ import { CloudDocumentModule } from './cloudDocument/cloud-document.module';
 import { WhiteboardModule } from './whiteboard/whiteboard.module';
 import { TableModule } from './table/table.module';
 import { CollaborationGateway } from './collaboration/collaboration.gateway';
+import { ProjectModule } from './project/project.module';
+import { ProjectMemberModule } from './project/project-member/project-member.module';
+import { ProjectTeamModule } from './project/project-team/project-team.module';
 
 
 @Module({
@@ -22,6 +25,9 @@ import { CollaborationGateway } from './collaboration/collaboration.gateway';
     CloudDocumentModule,
     WhiteboardModule,
     TableModule,
+    ProjectModule,
+    ProjectMemberModule,
+    ProjectTeamModule,
   ],
   providers: [AppService, ChatGateway, CollaborationGateway],
   controllers: [AppController, AuthController,],
