@@ -17,8 +17,9 @@ export class ProjectController {
 
   @Get(':id')
   @UseGuards(AuthGuard('jwt'))
-  async findOne(@Param('id') id: string): Promise<Project> {
-    return this.projectService.findOne(id);
+  async findOne(@Param('id') id: string, @Headers('Authorization') token: string): Promise<Project> {
+    const email = TokenUtil.extractEmailFromToken(token);
+    return this.projectService.findOne(id,email);
   }
 
   @Post()

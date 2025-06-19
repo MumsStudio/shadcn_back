@@ -265,7 +265,9 @@ model ProjectList {
   projectTeam ProjectTeam @relation(fields: [projectTeamId], references: [id])
   projectTeamId String
   name        String
+  owner       String
   cards       Json[]
+  listmembers Json[]
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime  @updatedAt @map("updated_at")
 }

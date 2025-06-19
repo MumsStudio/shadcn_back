@@ -14,6 +14,7 @@ import { CollaborationGateway } from './collaboration/collaboration.gateway';
 import { ProjectModule } from './project/project.module';
 import { ProjectMemberModule } from './project/project-member/project-member.module';
 import { ProjectTeamModule } from './project/project-team/project-team.module';
+import { ProjectListModule } from './project/project-list/project-list.module';
 
 
 @Module({
@@ -28,6 +29,7 @@ import { ProjectTeamModule } from './project/project-team/project-team.module';
     ProjectModule,
     ProjectMemberModule,
     ProjectTeamModule,
+    ProjectListModule
   ],
   providers: [AppService, ChatGateway, CollaborationGateway],
   controllers: [AppController, AuthController,],

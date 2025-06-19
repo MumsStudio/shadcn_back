@@ -31,7 +31,26 @@ export class ProjectMemberService {
     });
   }
 
-  async remove(projectId: string, id: string): Promise<ProjectMember> {
+  async remove(projectId: string, id: string): Promise<any> {
+    // 首先检查项目team数组中是否存在该成员
+    const project = await this.prisma.project.findUnique({
+      where: { id: projectId },
+      include: { teams: true }
+    });
+
+    if (!project) {
+      throw new Error('Project not found');
+    }
+
+    const memberExists = project.teams.some(team =>
+      team.members.some(member => member.id === id)
+    );
+
+    if (memberExists) {
+      return { message: "必须先退出项目所在小组才可退出项目" };
+    }
+
+    // 然后执行删除操作
     return this.prisma.projectMember.delete({
       where: { id, projectId }
     });

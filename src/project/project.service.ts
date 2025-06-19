@@ -24,11 +24,19 @@ export class ProjectService {
     });
   }
 
-  async findOne(id: string): Promise<Project | null> {
-    return this.prisma.project.findUnique({
+  async findOne(id: string, email: string): Promise<any | null> {
+    const project = await this.prisma.project.findUnique({
       where: { id },
-      include: { members: true, teams: true }
+      include: { members: true, teams: { include: { lists: true } } }
     });
+
+    if (!project ||
+      (project.creator !== email &&
+        !project.members.some(member => member.email === email))) {
+      return { message: '您没有权限查看', errCode: 403 };
+    }
+
+    return project;
   }
 
   async create(data: any): Promise<Project> {
@@ -54,11 +62,36 @@ export class ProjectService {
   async update(id: string, data: any): Promise<Project> {
     return this.prisma.project.update({
       where: { id },
-      data
+      data: {
+        ...data,
+        deadline: data.deadline? new Date(data.deadline) : null
+      }
     });
   }
 
   async remove(id: string): Promise<Project> {
+    // 先删除关联的ProjectMember
+    await this.prisma.projectMember.deleteMany({
+      where: { projectId: id }
+    });
+
+    // 删除关联的ProjectTeam及其ProjectList
+    const teams = await this.prisma.projectTeam.findMany({
+      where: { projectId: id },
+      select: { id: true }
+    });
+
+    for (const team of teams) {
+      await this.prisma.projectList.deleteMany({
+        where: { projectTeamId: team.id }
+      });
+    }
+
+    await this.prisma.projectTeam.deleteMany({
+      where: { projectId: id }
+    });
+
+    // 最后删除Project
     return this.prisma.project.delete({
       where: { id }
     });
